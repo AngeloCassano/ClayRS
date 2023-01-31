@@ -70,3 +70,13 @@ def estraiNodiOpposti_item_prop(G: NXFullGraph, item):
 
     opposite_nodes = map_prop.keys()
     return opposite_nodes
+
+# Funzione principale del Generator che prima ripulisce i dati contenuti nella struttura di triple di URI e poi
+# li utilizza per generare la spiegazione.
+# L'explanation è ritornata come output sotto forma di stringa
+def generate_explanation(triple_structure, item_raccom, profile, template, html):
+    explanation = ""
+    triple_structure = optimize_new_architecture_groups(triple_structure, item_raccom)
+    explanation = get_explanation_primo_livello(item_raccom, triple_structure, profile)
+
+    return explanation
