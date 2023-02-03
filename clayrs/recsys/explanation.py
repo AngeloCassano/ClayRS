@@ -142,11 +142,8 @@ def ranking_proprieta(G, proprieta_comuni, item_piaciuti, item_raccom, idf):
             score_prop[prop] = ((alfa * num_in_edges / len(item_piaciuti)) + (beta * num_out_edges / len(item_raccom)))
             if idf:
                 score_prop[prop] = score_prop[prop] * calcola_IDF(prop)
-
-        sorted_prop = dict((sorted(score_prop.items(), key=lambda item: item[1],  reverse=True)))  # ordino la lista di punteggi in ordine decrescente
-
+    sorted_prop = dict((sorted(score_prop.items(), key=lambda item: item[1],  reverse=True)))  # ordino la lista di punteggi in ordine decrescente
     print("Le proprieta sono state rankate e ordinate con successo!\n")
-
     return sorted_prop
 
 def proprieta_da_considerare(prop_rankate, numero_prop_considerate):
