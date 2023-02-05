@@ -82,7 +82,7 @@ def estraiNodiOpposti_item_prop(G: NXFullGraph, item):
 # Funzione principale del Generator che in base al tipo di configurazione per l'explanation data in input
 # richiama le rispettive sottofunzioni per la generazione della spiegazione (baseline, schema, primolivello)
 # L'explanation è ritornata come output sotto forma di stringa
-def generate_explanation(triple_structure, item_raccom, profile, scelta_configurazione, template, html):
+def generate_explanation(triple_structure, item_raccom, profile, G: NXFullGraph, scelta_configurazione, template, html):
     explanation = ""
 
     if scelta_configurazione == "baseline":               # codice per la generazione della spiegazione baseline
@@ -111,7 +111,7 @@ def generate_explanation(triple_structure, item_raccom, profile, scelta_configur
         elif len(triple_structure) > 0:
             triple_structure = optimize_triple_structure_multiple_recomendation(triple_structure, item_raccom)
 
-        explanation = get_explanation_primo_livello(template, item_raccom, triple_structure, profile, html)
+        explanation = get_explanation_primo_livello(template, item_raccom, triple_structure, profile, G, html)
 
     return explanation
 
@@ -304,7 +304,7 @@ def optimize_triple_structure_multiple_recomendation(triple_structure, item_racc
 # Funzione che genera la spiegazione di primolivello in linguaggio naturale
 # Si possono scegliere due tipi di template per generare la spiegazione e la possibilita di inserire tag html
 # per la visualizzazione degli items e delle proprieta in una pagina web
-def get_explanation_primo_livello(template, item_raccom, triple_structure, profile, html):
+def get_explanation_primo_livello(template, item_raccom, triple_structure, profile, G: NXFullGraph, html):
     natural_language_explanation = ""
     global item_spiegati
 
@@ -313,7 +313,7 @@ def get_explanation_primo_livello(template, item_raccom, triple_structure, profi
             if len(triple_structure) > 0:
                 natural_language_explanation = verboIniziale_getRandom() + " " \
                                                + get_item_raccomandato(triple_structure, 0, html) \
-                                               + " because " + get_frasi(triple_structure, profile, html)
+                                               + " because " + get_frasi(triple_structure, profile, G, html)
                 natural_language_explanation = natural_language_explanation.replace("_", " ")
                 while "  " in natural_language_explanation:
                     natural_language_explanation = natural_language_explanation.replace("  ", " ")
@@ -326,7 +326,7 @@ def get_explanation_primo_livello(template, item_raccom, triple_structure, profi
                 for i in range(len(triple_structure)):
                     natural_language_explanation += verboIniziale_getRandom() + " " \
                                                     + get_item_raccomandato(triple_structure, i, html) \
-                                                    + " because " + get_group_frasi(triple_structure, i, profile, html)
+                                                    + " because " + get_group_frasi(triple_structure, i, profile, G, html)
                 natural_language_explanation = natural_language_explanation.replace("_", " ")
                 while "  " in natural_language_explanation:
                     natural_language_explanation = natural_language_explanation.replace("  ", " ")
@@ -343,7 +343,7 @@ def get_explanation_primo_livello(template, item_raccom, triple_structure, profi
         if len(item_raccom) == 1:                      # costruzione della spiegazione se c'è un solo item raccomandato
             if len(triple_structure) > 0:
                 natural_language_explanation = verboIniziale2_getRandom() + " " \
-                                               + get_frasi(triple_structure, profile, html) + " "
+                                               + get_frasi(triple_structure, profile, G, html) + " "
                 frasi_raccomandazione = incipitRacc_getRandom()
                 if "So_why_don$t_you" not in frasi_raccomandazione:
                     natural_language_explanation += frasi_raccomandazione + " watch "\
@@ -368,13 +368,13 @@ def get_explanation_primo_livello(template, item_raccom, triple_structure, profi
                 for n in range(len(triple_structure)):
                     if n + 1 < len(triple_structure) and n != 0:
                         natural_language_explanation += get_avverbio(triple_structure) + " " \
-                                                        + verboIniziale2_getRandom() + " " + get_group_frasi_2(triple_structure, n, profile, html) + ". "
+                                                        + verboIniziale2_getRandom() + " " + get_group_frasi_2(triple_structure, n, profile, G, html) + ". "
                     elif n < len(triple_structure) and n != 0:
                         natural_language_explanation += get_avverbio_finale(triple_structure) \
-                                                        + " " + verboIniziale2_getRandom() + " " + get_group_frasi_2(triple_structure, n, profile, html) + ". "
+                                                        + " " + verboIniziale2_getRandom() + " " + get_group_frasi_2(triple_structure, n, profile, G, html) + ". "
                     else:
                         natural_language_explanation += verboIniziale2_getRandom() + " " \
-                                                        + get_group_frasi_2(triple_structure, n, profile, html) + ". "
+                                                        + get_group_frasi_2(triple_structure, n, profile, G, html) + ". "
 
                     frasi_raccomandazione = incipitRacc_getRandom()
                     if "So_why_don$t_you" not in frasi_raccomandazione:
@@ -594,41 +594,41 @@ def incipitRacc_getRandom():
 
 
 # Funzione che per ogni riga della struttura dati creata richiama la funzione che costruisce le frasi
-def get_frasi(triple_structure, profile, html):
+def get_frasi(triple_structure, profile, G: NXFullGraph, html):
     frasi = ""
     for i in range(len(triple_structure)):
-        frasi += costruisci_frase(triple_structure, i, profile, html)
+        frasi += costruisci_frase(triple_structure, i, profile, G, html)
 
     return frasi
 
 
 # Funzione che richiama la funzione che costruisce la frase
-def get_group_frasi(triple_structure, i, profile, html):
-    return costruisci_frase(triple_structure, i, profile, html)
+def get_group_frasi(triple_structure, i, profile, G: NXFullGraph, html):
+    return costruisci_frase(triple_structure, i, profile, G, html)
 
 
 # Funzione che costruisce la frase che spiega la raccomandazione e inserisce gli avverbi in base al numero di raccomandazioni
-def costruisci_frase(triple_structure, i, profile, html):
+def costruisci_frase(triple_structure, i, profile, G: NXFullGraph, html):
     frase = ""
     if i + 2 < len(triple_structure):
-        frase += "you " + get_avverbio_gradimento(triple_structure, i, profile) + "like " + get_lista_proprieta(triple_structure, i, html) + ".\n " + get_avverbio(triple_structure)
+        frase += "you " + get_avverbio_gradimento(triple_structure, i, profile, G) + "like " + get_lista_proprieta(triple_structure, i, html) + ".\n " + get_avverbio(triple_structure)
     elif i + 1 < len(triple_structure):
-        frase += "you " + get_avverbio_gradimento(triple_structure, i, profile) + "like " + get_lista_proprieta(triple_structure, i, html) + ".\n " + get_avverbio_finale(triple_structure)
+        frase += "you " + get_avverbio_gradimento(triple_structure, i, profile, G) + "like " + get_lista_proprieta(triple_structure, i, html) + ".\n " + get_avverbio_finale(triple_structure)
     else:
-        frase += "you " + get_avverbio_gradimento(triple_structure, i, profile) + "like " + get_lista_proprieta(triple_structure, i, html) + ".\n "
+        frase += "you " + get_avverbio_gradimento(triple_structure, i, profile, G) + "like " + get_lista_proprieta(triple_structure, i, html) + ".\n "
 
     return frase
 
 
 # Funzione che richiama una seconda funzione che costruisce la frase in un modo differente
-def get_group_frasi_2(triple_structure, i, profile, html):
-    return costruisci_frase_2(triple_structure, i, profile, html)
+def get_group_frasi_2(triple_structure, i, profile, G: NXFullGraph, html):
+    return costruisci_frase_2(triple_structure, i, profile, G, html)
 
 
 # Funzione che costruisce la frase che spiega la raccomandazione in un modo differente
-def costruisci_frase_2(triple_structure, i, profile, html):
+def costruisci_frase_2(triple_structure, i, profile, G: NXFullGraph, html):
     frase = ""
-    frase += "you " + get_avverbio_gradimento(triple_structure, i, profile) + "like " + get_lista_proprieta(triple_structure, i, html)
+    frase += "you " + get_avverbio_gradimento(triple_structure, i, profile, G) + "like " + get_lista_proprieta(triple_structure, i, html)
 
     return frase
 
@@ -689,7 +689,7 @@ def get_lista_proprieta(triple_structure, i, html):
 
 # Funzione che sceglie l'avverbio di gradimento in modo dinamico in base al numero di volte che la proprieta
 # appare nel profilo dell'utente. La scelta viene effettuata attraverso il calcolo di un punteggio di frequenza
-def get_quantificatore(property, movies_user_rated):
+def get_quantificatore(property, movies_user_rated, G: NXFullGraph):
     movies_with_prop_only_one = {}
     property_movies = []
     with open('movies_stored_prop.mapping', 'r') as f:
@@ -721,9 +721,9 @@ def get_quantificatore(property, movies_user_rated):
 
 # Funzione che richiama la funzione che sceglie l'avverbio di gradimento in modo dinamico in base al numero di volte
 # che la proprieta appare nel profilo dell'utente
-def get_avverbio_gradimento(triple_structure, i, profile):
+def get_avverbio_gradimento(triple_structure, i, profile, G: NXFullGraph):
     property = triple_structure[i].split('\t')[1].split('-and-')[0]
-    return get_quantificatore(property, profile)
+    return get_quantificatore(property, profile, G)
 
 
 # Funzione che in base al numero di raccomandazioni decide se inserire o meno l'avverbio nella frase
