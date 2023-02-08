@@ -692,7 +692,9 @@ def get_lista_proprieta(triple_structure, i, html):
 def get_quantificatore(property, movies_user_rated, G: NXFullGraph):
     movies_with_prop_only_one = {}
     property_movies = []
-    with open('movies_stored_prop.mapping', 'r') as f:
+    film_with_property = 0
+    prop_in_edges = G.get_predecessors(property)
+    """with open('movies_stored_prop.mapping', 'r') as f:
         for line in f:
             line = line.rstrip().split('\t')
             property_movies.append(line)
@@ -700,13 +702,12 @@ def get_quantificatore(property, movies_user_rated, G: NXFullGraph):
         if property == line[2]:
             movies_with_prop_only_one[line[0]] = ""
 
-    film_with_property = 0
     for movie_curr in movies_with_prop_only_one.keys():
         for key, value in movies_user_rated.items():
             if movie_curr == value:
                 film_with_property = film_with_property + 1
-
-    score = film_with_property / len(movies_user_rated)
+    """
+    score = len(prop_in_edges) / len(movies_user_rated)
     if score == 1.0:
         quantificatore = "always "
     elif score < 1.0 and score >= 0.6:
@@ -813,3 +814,10 @@ def get_subject_prop(prop_corrente):
     prop_corrente1 = text + " " + prop_pulita
 
     return prop_corrente1
+
+# Funzione che disegna e visualizza il grafo creato
+#DA INSERIRE NELLA CLASSE CHE CREA IL GRAFO NXFullGraph dei film e delle proprietà
+#La stampa del grafo G: NXFullGraph non è implementata al suo posto stampa una stringa
+#temporanea
+def visualizza_grafo(G: NXFullGraph):
+   print("*Stampa del grafo* \n")
