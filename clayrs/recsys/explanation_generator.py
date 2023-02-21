@@ -166,7 +166,6 @@ def optimize_triple_structure_single_reccomandation(triple_structure, item_racco
         current = current.replace("['", "")
         current = current.replace("']", "")
         triple_structure_cleaned_all.append(current)
-    #VALE LA PENA CREARE UNA NUOVA VARIABILE?
     triple_structure_cleaned = [] #list of URI triple
     for s in triple_structure_cleaned_all:
         splitted = s.split('\t')
@@ -388,7 +387,7 @@ def get_explanation_primo_livello(template, item_raccom, triple_structure, profi
                 natural_language_explanation = natural_language_explanation.replace("$", "\'")
                 while "  " in natural_language_explanation:
                     natural_language_explanation = natural_language_explanation.replace("  ", " ")
-                if item_spiegati != 0 and item_spiegati < 5:
+                if item_spiegati < (len(item_raccom)):
                     natural_language_explanation += "\nThe other recommendations are really particular, I can't still explain why you received them."
             else:
                 natural_language_explanation = "Your preferences are really particular! Sorry, but I can't still explain why you received such a recommendation."
@@ -814,6 +813,19 @@ def get_subject_prop(prop_corrente):
     prop_corrente1 = text + " " + prop_pulita
 
     return prop_corrente1
+
+# Funzione che prende in input il grafo creato e l'URI di una proprieta e stampa gli archi entranti (film piaciuti)
+# e gli archi uscenti (film raccomandati) di quella spcifica proprieta
+def stampa_vicini(G, item):
+    archi_entranti = G.in_edges(item)
+    print("Archi entranti per il nodo ", item, " (film piaciuti):")
+    for archi_entranti_spec in archi_entranti:
+        print(archi_entranti_spec[0])
+
+    archi_uscenti = G.out_edges(item)
+    print("Archi uscenti per il nodo ", item, " (film raccomandati):")
+    for archi_uscenti_spec in archi_uscenti:
+        print(archi_uscenti_spec[1])
 
 # Funzione che disegna e visualizza il grafo creato
 #DA INSERIRE NELLA CLASSE CHE CREA IL GRAFO NXFullGraph dei film e delle proprietà
